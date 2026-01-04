@@ -157,8 +157,8 @@ install_bundle_tools() {
             wget -qO "${tmp_dir}/bundle-tools.tar.gz" "$release_url" || die "Failed to download release"
         fi
 
-        # Extract
-        tar -xzf "${tmp_dir}/bundle-tools.tar.gz" -C "$tmp_dir" || die "Failed to extract archive"
+        # Extract (strip top-level directory for flat structure)
+        tar -xzf "${tmp_dir}/bundle-tools.tar.gz" -C "$tmp_dir" --strip-components=1 || die "Failed to extract archive"
     fi
 
     # Install files

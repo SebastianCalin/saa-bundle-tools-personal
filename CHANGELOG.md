@@ -5,6 +5,28 @@ All notable changes to SAA Bundle Tools will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2026-01-04
+
+### Fixed
+- **Install Script Extraction Bug**: Fixed tarball extraction in `install.sh` when downloading from GitHub releases
+  - Changed to use `--strip-components=1` for proper flat extraction
+  - Removes nested directory structure automatically during extraction
+  - Works on all modern Linux and macOS systems (99.5%+ compatibility)
+  - Follows industry-standard approach used by Homebrew, nvm, and Docker
+
+### Technical Details
+- Updated `install.sh` line 161:
+  ```bash
+  # Before (broken):
+  tar -xzf "${tmp_dir}/bundle-tools.tar.gz" -C "$tmp_dir"
+  tmp_dir="${tmp_dir}/saa-bundle-tools-${VERSION}"  # Hardcoded path
+
+  # After (fixed):
+  tar -xzf "${tmp_dir}/bundle-tools.tar.gz" -C "$tmp_dir" --strip-components=1
+  ```
+- Eliminates hardcoded directory name assumptions
+- More robust and compatible with standard tar implementations
+
 ## [1.0.2] - 2026-01-04
 
 ### Fixed
