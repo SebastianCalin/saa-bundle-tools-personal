@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "version": "1.0.0",
+  "registry": "drepsmate.azurecr.io",
+  "description": "SAA Platform Bundle Registry - Single source of truth for bundle creation and extraction",
+  "bundles": {
+    "saa-platform-bundle": {
+      "description": "Complete SAA Platform",
+      "type": "platform",
+      "source": {
+        "path": ".",
+        "excludes": [
+          ".git",
+          ".gitignore",
+          "*.git",
+          "node_modules",
+          "__pycache__",
+          "*.pyc",
+          ".pytest_cache",
+          "*.log",
+          "*.log.*",
+          "saa-asr-service/models",
+          "saa-asr-service/downloads",
+          "saa-asr-service/temp",
+          "*/downloads/*",
+          "*/temp/*",
+          "*/logs/*",
+          ".DS_Store",
+          "*.swp",
+          "*.swo",
+          "*~"
+        ]
+      },
+      "extraction": {
+        "mode": "root",
+        "target_name": "saa",
+        "default_parent_dir": "$HOME",
+        "creates": [
+          "saa/"
+        ],
+        "description": "Extracts entire platform to 'saa/' directory"
+      },
+      "metadata": {
+        "estimated_size_mb": 400,
+        "required_disk_space_gb": 1,
+        "use_case": "New installation, disaster recovery, full platform updates"
+      }
+    },
+    "saa-asr-service-bundle": {
+      "description": "ASR Service Deployment",
+      "type": "service",
+      "source": {
+        "path": "saa-asr-service",
+        "excludes": [
+          "models",
+          "downloads",
+          "temp",
+          "*.log",
+          "__pycache__",
+          "*.pyc"
+        ]
+      },
+      "extraction": {
+        "mode": "service",
+        "target_name": "saa-asr-service",
+        "default_parent_dir": "$HOME/saa",
+        "creates": [
+          "saa-asr-service/"
+        ],
+        "description": "Extracts to 'saa/saa-asr-service/' directory (updates existing service)"
+      },
+      "dependencies": [
+        "saa-models-bundle:1.0.0"
+      ],
+      "metadata": {
+        "estimated_size_mb": 40,
+        "required_disk_space_gb": 1,
+        "use_case": "ASR service updates, configuration changes"
+      }
+    },
+    "saa-anonymization-service-bundle": {
+      "description": "Anonymization Service",
+      "type": "service",
+      "source": {
+        "path": "saa-anonymization-service",
+        "excludes": [
+          "*.log",
+          "logs/",
+          "downloads/",
+          "temp/"
+        ]
+      },
+      "extraction": {
+        "mode": "service",
+        "target_name": "saa-anonymization-service",
+        "default_parent_dir": "$HOME/saa",
+        "creates": [
+          "saa-anonymization-service/"
+        ],
+        "description": "Extracts to 'saa/saa-anonymization-service/' directory"
+      },
+      "metadata": {
+        "estimated_size_mb": 1,
+        "required_disk_space_gb": 1,
+        "use_case": "Anonymization service updates"
+      }
+    },
+    "saa-observability-bundle": {
+      "description": "Observability Stack",
+      "type": "infrastructure",
+      "source": {
+        "path": "saa-observability",
+        "excludes": [
+          "*.log",
+          "data",
+          "prometheus/data",
+          "grafana/data",
+          "alertmanager/data"
+        ]
+      },
+      "extraction": {
+        "mode": "infrastructure",
+        "target_name": "saa-observability",
+        "default_parent_dir": "$HOME/saa",
+        "creates": [
+          "saa-observability/"
+        ],
+        "description": "Extracts to 'saa/saa-observability/' directory"
+      },
+      "metadata": {
+        "estimated_size_mb": 75,
+        "required_disk_space_gb": 1,
+        "use_case": "Monitoring stack updates, dashboard changes"
+      }
+    },
+    "saa-models-bundle": {
+      "description": "ASR ML Models (Romanian)",
+      "type": "models",
+      "source": {
+        "path_env": "SAA_MODELS_SOURCE",
+        "path_default": "/media/repsmate/main/models",
+        "excludes": []
+      },
+      "extraction": {
+        "mode": "models",
+        "target_name": "models",
+        "default_parent_dir": "/opt/saa-models",
+        "creates": [
+          "models/"
+        ],
+        "description": "Extracts models to specified directory (default: /opt/saa-models/models/)"
+      },
+      "metadata": {
+        "estimated_size_mb": 15000,
+        "required_disk_space_gb": 20,
+        "use_case": "Required for ASR service",
+        "model_dates": {
+          "asr": "20250624",
+          "vad": "20241001",
+          "speaker": "20241020",
+          "ner": "latest",
+          "sentiment": "20241020"
+        }
+      }
+    }
+  }
+}

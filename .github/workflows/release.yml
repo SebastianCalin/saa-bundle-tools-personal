@@ -1,0 +1,86 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Triggers on version tags like v1.0.2
+
+permissions:
+  contents: write  # Required to create releases
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create release archive
+        run: |
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+          ARCHIVE_NAME="saa-bundle-tools-v${VERSION}.tar.gz"
+
+          # Create directory structure
+          mkdir -p "saa-bundle-tools-v${VERSION}"
+
+          # Copy files
+          cp setup.sh "saa-bundle-tools-v${VERSION}/"
+          cp .bundle-registry.json "saa-bundle-tools-v${VERSION}/"
+          cp install.sh "saa-bundle-tools-v${VERSION}/"
+          cp README.md "saa-bundle-tools-v${VERSION}/"
+          cp CHANGELOG.md "saa-bundle-tools-v${VERSION}/"
+          cp VERSION "saa-bundle-tools-v${VERSION}/"
+
+          # Create tarball
+          tar -czf "$ARCHIVE_NAME" "saa-bundle-tools-v${VERSION}"
+
+          # Generate checksums
+          sha256sum "$ARCHIVE_NAME" > checksums.txt
+          sha256sum "saa-bundle-tools-v${VERSION}/setup.sh" >> checksums.txt
+          sha256sum "saa-bundle-tools-v${VERSION}/.bundle-registry.json" >> checksums.txt
+
+          echo "ARCHIVE_NAME=$ARCHIVE_NAME" >> $GITHUB_ENV
+
+      - name: Extract changelog for this version
+        id: changelog
+        run: |
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+
+          # Extract changelog section for this version
+          sed -n "/## \[${VERSION}\]/,/## \[/p" CHANGELOG.md | sed '$d' > release-notes.md
+
+          # If release notes are empty, use a default message
+          if [ ! -s release-notes.md ]; then
+            echo "Release v${VERSION}" > release-notes.md
+            echo "" >> release-notes.md
+            echo "See [CHANGELOG.md](CHANGELOG.md) for details." >> release-notes.md
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ steps.get_version.outputs.TAG }}
+          body_path: release-notes.md
+          files: |
+            ${{ env.ARCHIVE_NAME }}
+            checksums.txt
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update latest tag
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git tag -f latest
+          git push origin latest -f
