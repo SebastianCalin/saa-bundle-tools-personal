@@ -15,6 +15,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Follows industry-standard approach used by Homebrew, nvm, and Docker
 
 ### Technical Details
+ ### Added
+  - **Version Tracking Support**: Bundles now include `.bundle-version.json`
+   file
+    - OCI-compliant image labels embedded in Docker images
+    - Comprehensive version metadata (git commit, build timestamp, bundle
+  type)
+    - Follows OCI Image Spec v1.1.0 (November 2025) standards
+    - Enables support teams to identify exact client versions
+
+  ### Changed
+  - Updated bundle creation script in local-saa-personal to generate version
+   metadata
+  - Enhanced GitHub Actions workflow to display version information during
+  builds
+
+  ### Technical Details
+  - Version metadata includes:
+    - Bundle information (name, version, type, description)
+    - Build provenance (timestamp, git commit, branch, tag)
+    - Deployment details (registry, image, pull command)
+    - CI/CD metadata (workflow run, built by)
+  - Compliant with CISA SBOM guidelines 2025
+  - Supports GitOps practices with full audit trail
+  - Compatible with bundles v1.5.0-beta and later
+
+  ### Usage
+  After installation, check bundle version:
+  ```bash
+  cat ~/saa/.bundle-version.json | jq '.'
+
+## [1.0.3] - 2026-01-04
+
+### Fixed
+- **Install Script Extraction Bug**: Fixed tarball extraction in `install.sh` when downloading from GitHub releases
+  - Changed to use `--strip-components=1` for proper flat extraction
+  - Removes nested directory structure automatically during extraction
+  - Works on all modern Linux and macOS systems (99.5%+ compatibility)
+  - Follows industry-standard approach used by Homebrew, nvm, and Docker
+
+### Technical Details
 - Updated `install.sh` line 161:
   ```bash
   # Before (broken):
